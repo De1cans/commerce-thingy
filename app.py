@@ -222,7 +222,23 @@ def create_category():
     # return a response
     return category_schema.dump(new_category), 201
 
+# Delete a category
+@app.route("/categories/<int:id>", methods=["DELETE"])
+def delete_category(category_id):
+    # find the category with that id
+    stmt = db.select(Category).filter_by(id=category_id)
+    category = db.session.scalar(stmt)
+    if category:
+        # delete the category
+        db.session.delete(category)
+        # commit
+        db.session.commit()
+        # return some response
+        return {"message": f"Category {category.name} deleted successfully"}
+    else:
+        # return an error message 
+        return {"message": f"Category with id {category_id} does not exist"}, 404
+
 # Update a category
 @app.route("/categories/<int:category_id>", methods=["PUT", "PATCH"])
 def update_category(category_id):
-    
