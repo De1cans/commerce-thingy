@@ -195,6 +195,34 @@ def get_categories():
     return data
 
 # Read a single category
-@app.route("/categories/<int:product_id>", methods=["GET"])
+@app.route("/categories/<int:category_id>", methods=["GET"])
 def get_category(category_id):
     stmt = db.select(Category).filter_by(id=category_id)
+    category = db.session.scalar(stmt)
+    if category:
+        data = category_schema.dump(category)
+        return data
+    else:
+        return {"message": f"Category with id {category_id} does not exist"}, 404
+
+# Create a category
+@app.route("/categories", methods=["POST"])
+def create_category():
+    # get the data from the body of the request
+    body_data = request.get_json()
+    # create a category model onkect using the data from the request body 
+    new_category = Category(
+    name=body_data.get("name"),
+    description=body_data.get("description"),
+    )
+    # add it to the session
+    db.session.add(new_category)
+    # commit
+    db.session.commit()
+    # return a response
+    return category_schema.dump(new_category), 201
+
+# Update a category
+@app.route("/categories/<int:category_id>", methods=["PUT", "PATCH"])
+def update_category(category_id):
+    
