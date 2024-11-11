@@ -242,3 +242,19 @@ def delete_category(category_id):
 # Update a category
 @app.route("/categories/<int:category_id>", methods=["PUT", "PATCH"])
 def update_category(category_id):
+    # get the data from the request body 
+    body_data = request.get_json()
+    # find the category from the database
+    stmt = db.select(Category).filter_by(id=category_id)
+    category = db.session.scalar(stmt)
+    if category:
+        # update the attribute with the field from the request body
+        category.name = body_data.get("name") or category.name
+        category.description = body_data.get("description") or category.description
+        # commit 
+        db.session.commit()
+        # return a response
+        return category_schema.dump(category)
+    else:
+        # return an error message
+        return {"message": f"Category with id {category_id} does not exist"}, 404
