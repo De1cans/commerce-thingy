@@ -74,6 +74,24 @@ def seed_db():
     # add to session
     db.session.add(product1)
     db.session.add(product2)
+
+    # create list of categories object
+    categories = [
+        Category(
+            name="Category 1",
+            description="Category 1 description"
+        ),
+        Category(
+            name="Category 2",
+            description="Category 2 description"
+        ),
+        Category(
+            name="Category 3"
+        )
+    ]
+    # add the list to the session
+    db.session.add_all(categories)
+
     # commit
     db.session.commit()
     print("Tables seeded")
@@ -159,3 +177,24 @@ def update_product(product_id):
     else:
         # respond with an error message
         return {"message": f"Product with id {product_id} does not exist"}, 404
+
+# CRUD for categories
+# Read all categories - /categories - GET
+# Read a single category - /categories/id - GET
+# Create category - /categories - POST
+# Update category - /categories/id - PUT or PATCH
+# Delete category - /categories - DELETE
+
+# Read all categories
+@app.route("/categories", methods=["GET"])
+def get_categories():
+    stmt = db.select(Category)
+    categories_list = db.session.scalars(stmt)
+    # convert this list of python objects into a serialistable format
+    data = categories_schema.dump(categories_list)
+    return data
+
+# Read a single category
+@app.route("/categories/<int:product_id>", methods=["GET"])
+def get_category(category_id):
+    stmt = db.select(Category).filter_by(id=category_id)
